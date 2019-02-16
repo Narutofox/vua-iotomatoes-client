@@ -11,7 +11,8 @@ class ActionManager():
             self.url_get = 'http://localhost:50441/api/farms/4/ruleset'
         else:
             self.url_get = url_get
-            
+        
+        self.sensor_values = []
         self.url_post = 'http://localhost:50441/api/farms/'
         self.ruleset = None
         self.__initializeJobs()
@@ -49,9 +50,9 @@ class ActionManager():
         data = { 
             "currentTime" : seconds, 
             "currentDay" : currentDay,
-            "soilHumidity": soil_humidity,
-            "temperature" : temperature,
-            "airHumidity" : air_humidity
+            "soilHumidity": soil_humidity['value'],
+            "temperature" : temperature['value'],
+            "airHumidity" : air_humidity['value']
         }
         
         water = jsonLogic(json.loads(self.ruleset['wtr']), data) if soil_humidity != None else None
@@ -79,8 +80,14 @@ class ActionManager():
         try: 
             request = requests.post(url=self.url_post, data = metrics_json)
             request.raise_for_status()
-        except requests.exceptions.RequestException as e:
-            print(e)
+            
+            if len(self.sensor_values) > 0:
+                for val in self.sensor_values:
+                    request = requests.post(url=self.url_post, data = val)
+                    self.sensor_values.remove(val)
+                self.sensor_values = []
+        except:
+            self.sensor_values.append(metrics_json)
     
     def __del__(self):
         self.destroy()
