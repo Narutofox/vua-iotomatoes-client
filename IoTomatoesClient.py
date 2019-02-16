@@ -5,8 +5,8 @@ import time as time
 import RPi.GPIO as GPIO
 import json
 import requests
-
-
+from datetime import datetime
+from ActionManager import ActionManager
 
 GPIO.setmode(GPIO.BOARD) #pins number from board
 
@@ -67,13 +67,18 @@ def light_adc_to_percent(light_adc):
     max = 1023
     return 100 - int(round(((float(light_adc)-min)/(max-min))*100))
 
+manager = ActionManager()
+
 try:
     if __name__ == "__main__":
          while 1:
             print("------ Script start ------")
+            
             try:
                 #measurements = readValues()
-                print(light_adc_to_percent(lightSensor.readadc()))
+                lightSensorFromADC = lightSensor.readadc()
+                lightSensorValue = light_adc_to_percent(lightSensorFromADC)
+
                 print("Sending measurements")
                 #actuatorCommands = evaluateRules(measurments)
                 #startActuators(actuatorCommands)

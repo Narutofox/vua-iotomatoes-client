@@ -8,10 +8,11 @@ class ActionManager():
   
     def __init__(self, url_get = None):
         if url_get == None:
-            self.url_get = 'http://localhost:50441/api/farms/4/ruleset'
+            self.url_get = 'http://193.198.208.164:13080/api/farms/1/ruleset'
         else:
             self.url_get = url_get
         
+        self.started_date = datetime.now()
         self.sensor_values = []
         self.url_post = 'http://localhost:50441/api/farms/'
         self.ruleset = None
@@ -36,16 +37,16 @@ class ActionManager():
     def destroy(self):
         self.scheduler.remove_job(job_id="rest_job")
         
-    def get_actions(self, currentDay, temperature, air_humidity, soil_humidity, watering=False):
+    def get_actions(self, temperature, air_humidity, soil_humidity):
         
-        self.__save_metrics(temperature, air_humidity, soil_humidity)
+        #self.__save_metrics(temperature, air_humidity, soil_humidity)
+                
+        currentDate = datetime.now()
+        delta = currentDate - self.started_date
+        currentDay = delta.days
         
-        if watering == False:
-            soil_humidity=None
-        
-        now = datetime.now()
-        midnight = now.replace(hour=0, minute=0, second=0, microsecond=0)
-        seconds = (now - midnight).seconds
+        midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
+        seconds = (currentDate - midnight).seconds
         
         data = { 
             "currentTime" : seconds, 
@@ -92,10 +93,3 @@ class ActionManager():
     def __del__(self):
         self.destroy()
     
-        
-
-manager = ActionManager()
-manager.destroy()
-
-# ruleset example:
-# '{"and":[{">":[{"var":"currentTime"},{"+":[800,{"*":[{"/":[{"var":"currentDay"},3]},10]}]}]},{"<":[{"var":"currentTime"},{"-":[2400,{"*":[{"/":[{"var":"currentDay"},3]},10]}]}]}]}'
