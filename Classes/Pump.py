@@ -5,11 +5,12 @@ class Pump:
         
 
 
-	def __init__(self, pin, time=1):
+	def __init__(self, pin, time=1, actuatorId = 0):
 		#GPIO.setmode(GPIO.BCM)
 		GPIO.setup(pin, GPIO.OUT)
 		self.time = time
 		self.pin = pin
+		self.actuatorId = actuatorId
 
 	def runPump(self, sec=None):
                 if sec is not None:
