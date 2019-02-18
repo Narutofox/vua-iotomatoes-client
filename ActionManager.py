@@ -14,7 +14,7 @@ class ActionManager():
         else:
             self.url_get = url_get
             
-        self.minutes = 10
+        self.minutes = 15
         self.watering = True
         self.started_date = datetime.now()
         self.sensor_values = []
@@ -45,7 +45,6 @@ class ActionManager():
         currentDate = datetime.now()
         delta = currentDate - self.started_date
         currentDay = delta.days
-        
         midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
         seconds = (currentDate - midnight).seconds
         
@@ -53,14 +52,14 @@ class ActionManager():
             "currentTime" : seconds, 
             "currentDay" : currentDay,
             "soilHumidity": soil_humidity,
-            "temperature" : temperature,
+            "airTemperature" : temperature,
             "airHumidity" : air_humidity
         }
         
         watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering == True else False
         light = jsonLogic(json.loads(self.ruleset['lgt']), data)
-        heating = jsonLogic(json.loads(self.ruleset['htg']), data)
-        cooling = jsonLogic(json.loads(self.ruleset['clg']), data)
+        heating = jsonLogic(json.loads(self.ruleset['htn']), data)
+        cooling = jsonLogic(json.loads(self.ruleset['cln']), data)
 
         
         if watering:
@@ -78,11 +77,9 @@ class ActionManager():
         return actions
     
     def __watering_delay(self):
-        print('Watering delay started')
         self.watering = False
         time.sleep(self.minutes * 60)
         self.watering = True
-        print('Watering daly finished')
     
     def __del__(self):
         self.destroy()

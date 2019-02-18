@@ -8,9 +8,9 @@ GPIO.setmode(GPIO.BOARD) #pins number from board
 
 allPumps = []
 pumpsPins = [
-    {'pinBoard':11, 'sensorId': None},
-    {'pinBoard':13, 'sensorId': None},
-    {'pinBoard':15, 'sensorId': None}
+    {'pinBoard':11, 'sensorId': None}, # p1
+    {'pinBoard':13, 'sensorId': None}, # p2
+    {'pinBoard':15, 'sensorId': None}  # p3
 ]
 
 allSoil = []
