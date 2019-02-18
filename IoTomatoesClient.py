@@ -10,9 +10,9 @@ from ActionManager import ActionManager
 
 GPIO.setmode(GPIO.BOARD) #pins number from board
 
-WATERING_TIME_SEC = 15
+WATERING_TIME_SEC = 5
 #global MOTOR_RUNTIME
-MOTOR_RUNTIME = 3
+MOTOR_RUNTIME = 5
 
 global curr_pos
 curr_pos = "None"
@@ -87,6 +87,7 @@ def sendData(measurements):
     r = requests.post(baseUrl + sensorMeasurmentsUrlSuffix
                       , json={'1': measurements[0],
                               '2': measurements[1],
+                              '3': measurements[4],
                               '4': measurements[2],
                               '5': measurements[3]})
 
@@ -152,6 +153,7 @@ try:
                 print('Starting commands')
                 startActuators(actuatorCommands)
                 print("Sending measurements")
+                print(measurements)
                 sendData(measurements)
             except:
                 print("Error")

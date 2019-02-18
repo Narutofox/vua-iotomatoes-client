@@ -24,7 +24,7 @@ class ActionManager():
     def __initializeJobs(self):
         self.__getRuleset()
         self.scheduler = BackgroundScheduler()
-        self.scheduler.add_job(self.__getRuleset, "interval", seconds=10, id="rest_job")
+        self.scheduler.add_job(self.__getRuleset, "interval", seconds=15*60, id="rest_job")
         self.scheduler.start() 
     
     def __getRuleset(self):
