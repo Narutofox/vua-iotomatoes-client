@@ -3,6 +3,8 @@ from apscheduler.schedulers.background import BackgroundScheduler
 import json
 from json_logic import jsonLogic
 from datetime import datetime
+import time
+from threading import Thread
 
 class ActionManager():
   
@@ -11,10 +13,11 @@ class ActionManager():
             self.url_get = 'http://193.198.208.164:13080/api/farms/1/ruleset'
         else:
             self.url_get = url_get
-        
+            
+        self.minutes = 10
+        self.watering = True
         self.started_date = datetime.now()
         self.sensor_values = []
-        self.url_post = 'http://localhost:50441/api/farms/'
         self.ruleset = None
         self.__initializeJobs()
             
@@ -38,8 +41,6 @@ class ActionManager():
         self.scheduler.remove_job(job_id="rest_job")
         
     def get_actions(self, temperature, air_humidity, soil_humidity):
-        
-        #self.__save_metrics(temperature, air_humidity, soil_humidity)
                 
         currentDate = datetime.now()
         delta = currentDate - self.started_date
@@ -51,18 +52,24 @@ class ActionManager():
         data = { 
             "currentTime" : seconds, 
             "currentDay" : currentDay,
-            "soilHumidity": soil_humidity['value'],
-            "temperature" : temperature['value'],
-            "airHumidity" : air_humidity['value']
+            "soilHumidity": soil_humidity,
+            "temperature" : temperature,
+            "airHumidity" : air_humidity
         }
         
-        water = jsonLogic(json.loads(self.ruleset['wtr']), data) if soil_humidity != None else None
+        watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering == True else False
         light = jsonLogic(json.loads(self.ruleset['lgt']), data)
         heating = jsonLogic(json.loads(self.ruleset['htg']), data)
         cooling = jsonLogic(json.loads(self.ruleset['clg']), data)
+
         
+        if watering:
+            thread = Thread(target = self.__watering_delay)
+            thread.start()
+        
+
         actions = {
-            'water': water,
+            'watering': watering,
             'light': light,
             'heating': heating,
             'cooling': cooling
@@ -70,26 +77,12 @@ class ActionManager():
         
         return actions
     
-    def __save_metrics(self, temperature, air_humidity, soil_humidity):
-                
-        metrics_json = { 
-            "Temperature" : temperature, 
-            "AirHumidity" : air_humidity,
-            "SoilHumidity": soil_humidity
-        }
-        
-        try: 
-            request = requests.post(url=self.url_post, data = metrics_json)
-            request.raise_for_status()
-            
-            if len(self.sensor_values) > 0:
-                for val in self.sensor_values:
-                    request = requests.post(url=self.url_post, data = val)
-                    self.sensor_values.remove(val)
-                self.sensor_values = []
-        except:
-            self.sensor_values.append(metrics_json)
+    def __watering_delay(self):
+        print('Watering delay started')
+        self.watering = False
+        time.sleep(self.minutes * 60)
+        self.watering = True
+        print('Watering daly finished')
     
     def __del__(self):
         self.destroy()
-    

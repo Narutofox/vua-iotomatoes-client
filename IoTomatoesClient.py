@@ -75,10 +75,15 @@ try:
             print("------ Script start ------")
             
             try:
-                #measurements = readValues()
+                measurements = readValues()
+                
                 lightSensorFromADC = lightSensor.readadc()
                 lightSensorValue = light_adc_to_percent(lightSensorFromADC)
-
+                
+                actions_plant_1 = manager.get_actions(measurements[0], measurements[1], measurements[2])
+                actions_plant_2 = manager.get_actions(measurements[0], measurements[1], measurements[3])
+                actions_plant_3 = manager.get_actions(measurements[0], measurements[1], measurements[3])
+                
                 print("Sending measurements")
                 #actuatorCommands = evaluateRules(measurments)
                 #startActuators(actuatorCommands)
