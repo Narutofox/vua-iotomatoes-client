@@ -112,18 +112,14 @@ def startActuators(actuatorCommands):
     else:
         lamp.off()
         
-    print(curr_pos)
-    print("1")
     
     if (curr_pos != 'htn') & (actuatorCommands['heating']):
-        print("1.1")
         motor.forward()
         time.sleep(MOTOR_RUNTIME)
         motor.stop()
         curr_pos = 'htn'
         
     
-    print("2")
     if (curr_pos != 'cln') & (actuatorCommands['cooling']):
         motor.reverse()        
         time.sleep(MOTOR_RUNTIME)
@@ -131,35 +127,32 @@ def startActuators(actuatorCommands):
         curr_pos = 'cln'
         
         
-    print("3")
     if actuatorCommands['pump1']:
         pump1.runPump(WATERING_TIME_SEC)
         
         
-    print("4")
     if actuatorCommands['pump2']:
         pump2.runPump(WATERING_TIME_SEC)
         
         
-    print("5")
     if actuatorCommands['pump3']:
         pump3.runPump(WATERING_TIME_SEC)
         
 
-    print("6")
 try:
     if __name__ == "__main__":
          while 1:
             print("------ Script start ------")
             
             try:
+                print('Reading values')
                 measurements = readValues()
-                print("Sending measurements")
+                print('Evaluating rules')
                 actuatorCommands = evaluateRules(measurements)
-                print('starting commands')
+                print('Starting commands')
                 startActuators(actuatorCommands)
-                
-                #sendData(measurements)
+                print("Sending measurements")
+                sendData(measurements)
             except:
                 print("Error")
             time.sleep(executeTime)

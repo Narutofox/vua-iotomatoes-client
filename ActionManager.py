@@ -15,7 +15,7 @@ class ActionManager():
             self.url_get = url_get
             
         self.minutes = 15
-        self.watering = [{1: True}, {2: True}]
+        self.watering = {1: True, 2: True}
         self.started_date = datetime.now()
         self.sensor_values = []
         self.ruleset = None
@@ -57,7 +57,6 @@ class ActionManager():
         }
         
         pump = soil_humidity['pump']
-        
         watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering[pump] == True else False
         light = jsonLogic(json.loads(self.ruleset['lgt']), data)
         heating = jsonLogic(json.loads(self.ruleset['htn']), data)
@@ -65,7 +64,7 @@ class ActionManager():
 
         
         if watering:
-            thread = Thread(target = self.__watering_delay, args(pump,))
+            thread = Thread(target = self.__watering_delay, args=[pump])
             thread.start()
         
 
