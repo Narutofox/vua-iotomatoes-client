@@ -1,3 +1,3 @@
 #!/bin/sh
-sleep 5
-sudo python /home/pi/Desktop/scripts/IoTomatoesClient.py
+(sleep 20 
+sudo python /home/pi/Desktop/scripts/IoTomatoesClient.py)

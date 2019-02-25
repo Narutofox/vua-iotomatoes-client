@@ -14,7 +14,8 @@ class ActionManager():
         else:
             self.url_get = url_get
             
-        self.minutes = 15
+        self.watering_delay = 60*30 #seconds
+	self.scheduler_seconds = 60 * 15
         self.watering = {1: True, 2: True}
         self.started_date = datetime.now()
         self.sensor_values = []
@@ -24,7 +25,7 @@ class ActionManager():
     def __initializeJobs(self):
         self.__getRuleset()
         self.scheduler = BackgroundScheduler()
-        self.scheduler.add_job(self.__getRuleset, "interval", seconds=15*60, id="rest_job")
+        self.scheduler.add_job(self.__getRuleset, "interval", seconds=self.scheduler_seconds, id="rest_job")
         self.scheduler.start() 
     
     def __getRuleset(self):
@@ -36,10 +37,14 @@ class ActionManager():
         except requests.exceptions.RequestException as e:
             print("Error")
             print(e)
-        
+    
     def destroy(self):
         self.scheduler.remove_job(job_id="rest_job")
-        
+    
+    def __get_time(self, seconds):
+	hours, minutes = seconds // 3600, seconds // 60 % 60
+	return str(hours) + '' + str(minutes)
+
     def get_actions(self, temperature, air_humidity, soil_humidity):
                 
         currentDate = datetime.now()
@@ -47,15 +52,17 @@ class ActionManager():
         currentDay = delta.days
         midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
         seconds = (currentDate - midnight).seconds
-        
+
+	currentTime = self.__get_time(seconds)
+
         data = { 
-            "currentTime" : seconds, 
+            "currentTime" : int(currentTime) - 200, 
             "currentDay" : currentDay,
             "soilHumidity": soil_humidity['value'],
             "airTemperature" : temperature,
             "airHumidity" : air_humidity
         }
-        
+        print(data)
         pump = soil_humidity['pump']
         watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering[pump] == True else False
         light = jsonLogic(json.loads(self.ruleset['lgt']), data)
@@ -74,12 +81,12 @@ class ActionManager():
             'heating': heating,
             'cooling': cooling
         }
-        
+        print('\n\n', actions)
         return actions
     
     def __watering_delay(self, pump):
         self.watering[pump] = False
-        time.sleep(self.minutes * 60)
+        time.sleep(self.watering_delay)
         self.watering[pump] = True
     
     def __del__(self):

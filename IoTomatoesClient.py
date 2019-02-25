@@ -13,9 +13,13 @@ GPIO.setmode(GPIO.BOARD) #pins number from board
 WATERING_TIME_SEC = 5
 #global MOTOR_RUNTIME
 MOTOR_RUNTIME = 5
+EXECUTE_PELTIER_TIME = 5 #seconds
+EXECUTE_TIME = 60 #seconds
 
 global curr_pos
+global counter
 curr_pos = "None"
+counter = 0
 
 
 
@@ -43,12 +47,9 @@ sensorMeasurmentsUrlSuffix = "sensorMeasurements"
 lampPin = 36
 
 peltierPin = 40
-executePeltierTime = 5 #seconds
 
 motorPin1 = 16
 motorPin2 = 18
-
-executeTime = 1 #seconds
 
 manager = ActionManager()
 
@@ -60,6 +61,9 @@ pump3 = Classes.Pump(pump3_pin)
 
 peltier = Classes.Peltier(peltierPin)
 motor = Classes.Motor(motorPin1, motorPin2)
+# Write sensor data to LCD
+LCD = Classes.LCD(29, 31, 33, 35, 37, 38)
+LCD.begin(16,2)
 
 for pin in pumpsPins:
     allPumps.append(Classes.Pump(pin['pinBoard']))
@@ -104,6 +108,23 @@ def evaluateRules(measurments):
             "light": actions_plant_1['light']
         }
 
+def displayOnLCD(measurments):
+    global counter
+    LCD.clear()
+    
+    if(counter < 1):
+        LCD.write("Temp: %dC, Hum: %d%%" % (measurments[0], measurments[1]))
+        LCD.nextline()
+        LCD.write("Light: %d%%" % measurments[4])
+    else:
+        LCD.write("Soil 1: %d%%" % measurments[2])
+        LCD.nextline()
+        LCD.write("Soil 2: %d%%" % measurments[3])
+        
+    counter = counter +1
+    if(counter == 2):
+        counter = 0
+
 def startActuators(actuatorCommands):
     global curr_pos
     #global MOTOR_RUNTIME
@@ -127,6 +148,11 @@ def startActuators(actuatorCommands):
         motor.stop()
         curr_pos = 'cln'
         
+    if ((actuatorCommands['heating']) | (actuatorCommands['cooling'])):
+        peltier.on()
+    else:
+        peltier.off()
+        
         
     if actuatorCommands['pump1']:
         pump1.runPump(WATERING_TIME_SEC)
@@ -145,9 +171,11 @@ try:
          while 1:
             print("------ Script start ------")
             
-            try:
+            try:            
                 print('Reading values')
                 measurements = readValues()
+                print('Displaying values')
+                displayOnLCD(measurements)                
                 print('Evaluating rules')
                 actuatorCommands = evaluateRules(measurements)
                 print('Starting commands')
@@ -157,7 +185,7 @@ try:
                 sendData(measurements)
             except:
                 print("Error")
-            time.sleep(executeTime)
+            time.sleep(EXECUTE_TIME)
 except KeyboardInterrupt:
     print("Exit program")
 finally:
