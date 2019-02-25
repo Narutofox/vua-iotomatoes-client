@@ -53,16 +53,16 @@ class ActionManager():
         midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
         seconds = (currentDate - midnight).seconds
 
-	currentTime = self.__get_time(seconds)
+		currentTime = self.__get_time(seconds)
 
         data = { 
-            "currentTime" : int(currentTime) - 200, 
+            "currentTime" : int(currentTime), 
             "currentDay" : currentDay,
             "soilHumidity": soil_humidity['value'],
             "airTemperature" : temperature,
             "airHumidity" : air_humidity
         }
-        print(data)
+		
         pump = soil_humidity['pump']
         watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering[pump] == True else False
         light = jsonLogic(json.loads(self.ruleset['lgt']), data)
@@ -81,7 +81,7 @@ class ActionManager():
             'heating': heating,
             'cooling': cooling
         }
-        print('\n\n', actions)
+		
         return actions
     
     def __watering_delay(self, pump):
