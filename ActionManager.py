@@ -56,7 +56,7 @@ class ActionManager():
 	currentTime = self.__get_time(seconds)
 
         data = { 
-            "currentTime" : int(currentTime), 
+            "currentTime" : int(currentTime) - 200, 
             "currentDay" : currentDay,
             "soilHumidity": soil_humidity['value'],
             "airTemperature" : temperature,
