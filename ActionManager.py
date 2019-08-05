@@ -15,7 +15,7 @@ class ActionManager():
             self.url_get = url_get
             
         self.watering_delay = 60*30 #seconds
-	self.scheduler_seconds = 60 * 15
+        self.scheduler_seconds = 60 * 15
         self.watering = {1: True, 2: True}
         self.started_date = datetime.now()
         self.sensor_values = []
@@ -42,18 +42,16 @@ class ActionManager():
         self.scheduler.remove_job(job_id="rest_job")
     
     def __get_time(self, seconds):
-	hours, minutes = seconds // 3600, seconds // 60 % 60
-	return str(hours) + '' + str(minutes)
+        hours, minutes = seconds // 3600, seconds // 60 % 60
+        return str(hours) + '' + str(minutes)
 
-    def get_actions(self, temperature, air_humidity, soil_humidity):
-                
+    def get_actions(self, temperature, air_humidity, soil_humidity):                
         currentDate = datetime.now()
         delta = currentDate - self.started_date
         currentDay = delta.days
         midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
         seconds = (currentDate - midnight).seconds
-
-		currentTime = self.__get_time(seconds)
+        currentTime = self.__get_time(seconds)
 
         data = { 
             "currentTime" : int(currentTime), 
@@ -62,7 +60,6 @@ class ActionManager():
             "airTemperature" : temperature,
             "airHumidity" : air_humidity
         }
-		
         pump = soil_humidity['pump']
         watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering[pump] == True else False
         light = jsonLogic(json.loads(self.ruleset['lgt']), data)
@@ -81,7 +78,6 @@ class ActionManager():
             'heating': heating,
             'cooling': cooling
         }
-		
         return actions
     
     def __watering_delay(self, pump):

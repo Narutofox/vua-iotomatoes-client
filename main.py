@@ -85,12 +85,12 @@ try:
                 strSoil += str(soil.read_pct()) + '%, '
                 strSoilAdc += str(soil.readadc()) + ', '
             
-            print strSoilAdc
-            print strSoil[:-1]
+            print(strSoilAdc)
+            print(strSoil[:-1])
             
             # Read temperature and air humidity
             hum, temp = Adafruit_DHT.read_retry(22, 4)
-            print "Temp: %dC, Humidity: %d%%" % (temp, hum)
+            print("Temp: %dC, Humidity: %d%%" % (temp, hum))
             
             # Write sensor data to LCD
             LCD = Classes.LCD(29, 31, 33, 35, 37, 38)
@@ -106,6 +106,3 @@ except KeyboardInterrupt:
     print("Exit program")
 finally:
     GPIO.cleanup()
-        
-	
-	

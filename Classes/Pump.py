@@ -13,11 +13,11 @@ class Pump:
 		self.actuatorId = actuatorId
 
 	def runPump(self, sec=None):
-                if sec is not None:
-                    self.time = sec
-                self.pump_on()
-                time.sleep(self.time)
-                self.pump_off()
+        if sec is not None:
+            self.time = sec
+        self.pump_on()
+        time.sleep(self.time)
+        self.pump_off()
 
 
 	def pump_on(self):
@@ -30,4 +30,4 @@ class Pump:
 		print("Pump " + str(self.pin) + " is off")
 	
 	def clean_gpio(self):
-                GPIO.cleanup()
+        GPIO.cleanup()
