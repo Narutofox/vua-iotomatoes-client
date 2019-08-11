@@ -40,7 +40,7 @@ soilPins = [
     {'chPin':6, 'sensorId': 5}
 ]
 
-baseUrl = "http://193.198.208.164:13080/api/"
+baseUrl = "https://cicekthesis.azurewebsites.net/api/"
 sensorMeasurmentsUrlSuffix = "sensorMeasurements"
 
 # Pin configuration

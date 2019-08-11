@@ -10,7 +10,7 @@ class ActionManager():
   
     def __init__(self, url_get = None):
         if url_get == None:
-            self.url_get = 'http://193.198.208.164:13080/api/farms/1/ruleset'
+            self.url_get = 'https://cicekthesis.azurewebsites.net/api/farms/1/ruleset'
         else:
             self.url_get = url_get
             
