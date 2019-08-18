@@ -1,4 +1,9 @@
-import Classes
+from Classes.Pump import Pump
+from Classes.LiquidCrystalPi import LCD
+from Classes.Lamp import Lamp
+from Classes.Mcp3008 import Mcp3008
+from Classes.Peltier import Peltier
+from Classes.Motor import Motor
 import sys
 import Adafruit_DHT
 import time as time
@@ -53,25 +58,25 @@ motorPin2 = 18
 
 manager = ActionManager()
 
-lamp = Classes.Lamp(lampPin)
+lamp = Lamp(lampPin)
 
-pump1 = Classes.Pump(pump1_pin)
-pump2 = Classes.Pump(pump2_pin)
-pump3 = Classes.Pump(pump3_pin)
+pump1 = Pump(pump1_pin)
+pump2 = Pump(pump2_pin)
+pump3 = Pump(pump3_pin)
 
-peltier = Classes.Peltier(peltierPin)
-motor = Classes.Motor(motorPin1, motorPin2)
+peltier = Peltier(peltierPin)
+motor = Motor(motorPin1, motorPin2)
 # Write sensor data to LCD
-LCD = Classes.LCD(29, 31, 33, 35, 37, 38)
-LCD.begin(16,2)
+LCDisplay = LCD(29, 31, 33, 35, 37, 38)
+LCDisplay.begin(16,2)
 
 for pin in pumpsPins:
-    allPumps.append(Classes.Pump(pin['pinBoard']))
+    allPumps.append(Pump(pin['pinBoard']))
     
 for ch in soilPins:
-    allSoil.append(Classes.Mcp3008(ch['chPin']))
+    allSoil.append(Mcp3008(ch['chPin']))
 
-lightSensor = Classes.Mcp3008(5)
+lightSensor = Mcp3008(5)
 
     
 def light_adc_to_percent(light_adc):
@@ -110,16 +115,16 @@ def evaluateRules(measurments):
 
 def displayOnLCD(measurments):
     global counter
-    LCD.clear()
+    LCDisplay.clear()
     
     if(counter < 1):
-        LCD.write("Temp: %dC, Hum: %d%%" % (measurments[0], measurments[1]))
-        LCD.nextline()
-        LCD.write("Light: %d%%" % measurments[4])
+        LCDisplay.write("Temp: %dC, Hum: %d%%" % (measurments[0], measurments[1]))
+        LCDisplay.nextline()
+        LCDisplay.write("Light: %d%%" % measurments[4])
     else:
-        LCD.write("Soil 1: %d%%" % measurments[2])
-        LCD.nextline()
-        LCD.write("Soil 2: %d%%" % measurments[3])
+        LCDisplay.write("Soil 1: %d%%" % measurments[2])
+        LCDisplay.nextline()
+        LCDisplay.write("Soil 2: %d%%" % measurments[3])
         
     counter = counter +1
     if(counter == 2):

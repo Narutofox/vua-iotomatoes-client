@@ -98,13 +98,13 @@ try:
             print("Temp: %dC, Humidity: %d%%" % (temp, hum))
             
             # Write sensor data to LCD
-            LCD = LCD(29, 31, 33, 35, 37, 38)
-            LCD.begin(16,2)
+            LCDisplay = LCD(29, 31, 33, 35, 37, 38)
+            LCDisplay.begin(16,2)
             
             time.sleep(0.5)
-            LCD.write("Temp: %dC, Hum: %d%%" % (temp, hum)) 
-            LCD.nextline()
-            LCD.write(strSoil[:-1])
+            LCDisplay.write("Temp: %dC, Hum: %d%%" % (temp, hum)) 
+            LCDisplay.nextline()
+            LCDisplay.write(strSoil[:-1])
             
             time.sleep(executeTime)
 except KeyboardInterrupt:
