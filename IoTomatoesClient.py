@@ -78,7 +78,9 @@ for ch in soilPins:
 
 lightSensor = Mcp3008(5)
 
-    
+airHumAirTempPin = 4
+airHumAirTempSensor = Adafruit_DHT.DHT22
+
 def light_adc_to_percent(light_adc):
     min = 0
     max = 1023
@@ -87,7 +89,7 @@ def light_adc_to_percent(light_adc):
 def readValues():
     soilHum1 = allSoil[0].read_pct()
     soilHum2 = allSoil[1].read_pct()
-    airHum, airTemp = Adafruit_DHT.read_retry(22, 4)
+    airHum, airTemp = Adafruit_DHT.read_retry(airHumAirTempSensor, airHumAirTempPin)
     lightSensorFromADC = lightSensor.readadc()
     lightSensorValue = light_adc_to_percent(lightSensorFromADC)
     return [airTemp, airHum, soilHum1, soilHum2, lightSensorValue]
