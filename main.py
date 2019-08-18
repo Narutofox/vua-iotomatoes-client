@@ -1,4 +1,9 @@
-import Classes
+from Classes.Pump import Pump
+from Classes.LiquidCrystalPi import LCD
+from Classes.Lamp import Lamp
+from Classes.Mcp3008 import Mcp3008
+from Classes.Peltier import Peltier
+from Classes.Motor import Motor
 import sys
 import Adafruit_DHT
 import time as time
@@ -31,10 +36,10 @@ motorPin2 = 18
 executeTime = 5 #seconds
 
 for pin in pumpsPins:
-    allPumps.append(Classes.Pump(pin['pinBoard']))
+    allPumps.append(Pump(pin['pinBoard']))
     
 for ch in soilPins:
-    allSoil.append(Classes.Mcp3008(ch['chPin']))
+    allSoil.append(Mcp3008(ch['chPin']))
     
 try:
     if __name__ == "__main__":
@@ -43,7 +48,7 @@ try:
             print("------ Script start ------")
             
             # Configure lamps on/off
-            lamp = Classes.Lamp(lampPin)
+            lamp = Lamp(lampPin)
             lamp.on()
             
             time.sleep(1)
@@ -52,7 +57,7 @@ try:
             time.sleep(1)
             
             # Configure peltier
-            peltier = Classes.Peltier(peltierPin)
+            peltier = Peltier(peltierPin)
             peltier.on()
             
             time.sleep(executePeltierTime)
@@ -61,7 +66,7 @@ try:
             time.sleep(1)
             
             # Configure motors
-            motor = Classes.Motor(motorPin1, motorPin2)
+            motor = Motor(motorPin1, motorPin2)
             motor.forward()
             
             time.sleep(3)
@@ -93,7 +98,7 @@ try:
             print("Temp: %dC, Humidity: %d%%" % (temp, hum))
             
             # Write sensor data to LCD
-            LCD = Classes.LCD(29, 31, 33, 35, 37, 38)
+            LCD = LCD(29, 31, 33, 35, 37, 38)
             LCD.begin(16,2)
             
             time.sleep(0.5)
