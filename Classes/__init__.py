@@ -4,3 +4,5 @@ from .Lamp import Lamp
 from .Mcp3008 import Mcp3008
 from .Peltier import Peltier
 from .Motor import Motor
+from .IRSensor import IRSensor
+from .UltrasonicSensor import UltrasonicSensor
