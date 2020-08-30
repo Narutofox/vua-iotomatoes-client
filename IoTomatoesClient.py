@@ -47,7 +47,7 @@ soilPins = [
     {'chPin':7, 'sensorId': 4},
     {'chPin':6, 'sensorId': 5}
 ]
-
+farmId = 1;
 baseUrl = "https://cicekthesis.azurewebsites.net/api/"
 sensorMeasurmentsUrlSuffix = "sensorMeasurements"
 
@@ -106,10 +106,11 @@ def sendData(measurements):
 	if 	(int(airTemp) != lastAirTemp) or (int(airHum) != lastAirHum) or (int(soilHum) != lastSoilHum1) or (int(lightSensor)) != lastLight)
 
 		r = requests.post(baseUrl + sensorMeasurmentsUrlSuffix
-						  , json={'1': airTemp,
-								  '2': airHum,
-								  '3': soilHum,
-								  '4': lightSensor})
+						  , json={'FarmId': farmId,
+								  'Temperature': airTemp,
+								  'AirHumidity': airHum,
+								  'SoilHumidity': soilHum,
+								  'Light': lightSensor})
 	
 	lastAirTemp, lastAirHum, lastSoilHum1, lastLight = int(float(airTemp)),int(float(airHum)), int(float(soilHum)),int(float(lightSensor))
 
@@ -183,21 +184,6 @@ def startActuators(actuatorCommands):
     if actuatorCommands['pump3']:
         pump3.runPump(WATERING_TIME_SEC)
         
-def setSensors():
-	 request = requests.get(url=self.url_get)
-	 request.raise_for_status()
-		if request.ok:
-			farmSensors = json.loads(request.content)
-			if 'code' in farmSensors:
-				for farmSensor in farmSensors:
-					if farmSensor['code'].startswith("TMP")
-						airTempSensorId = farmSensor['id']
-					elif farmSensor['code'].startswith("AHUM")
-						airHumSensorId = farmSensor['id']
-					elif farmSensor['code'].startswith("LGT")
-						lightSensorId = farmSensor['id']
-					elif farmSensor['code'].startswith("SHUM")
-						soilHum1SensorId = farmSensor['id']
 try:
     if __name__ == "__main__":
 	
@@ -206,7 +192,7 @@ try:
 		httpServer = HTTPServer((hostName, hostPort), myServer)
 		print("Server Starts - %s:%s" % (hostName, hostPort))
 		httpServer.serve_forever()
-		setSensors();
+		
          while 1:
             print("------ Script start ------")
             
