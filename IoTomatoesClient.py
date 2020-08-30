@@ -12,6 +12,8 @@ import json
 import requests
 from datetime import datetime
 from ActionManager import ActionManager
+from Classes.WebServer import MyServer
+from http.server import BaseHTTPRequestHandler, HTTPServer
 
 GPIO.setmode(GPIO.BOARD) #pins number from board
 
@@ -20,12 +22,13 @@ WATERING_TIME_SEC = 5
 MOTOR_RUNTIME = 5
 EXECUTE_PELTIER_TIME = 5 #seconds
 EXECUTE_TIME = 60 #seconds
-
+ 
 global curr_pos
 global counter
+lastAirTemp, lastAirHum, lastSoilHum1, lastLight = 0,0,0,0
 curr_pos = "None"
 counter = 0
-
+airTempSensorId, airHumSensorId, soilHum1SensorId, lightSensorId = 0,0,0,0
 
 
 allPumps = []
@@ -66,6 +69,7 @@ pump3 = Pump(pump3_pin)
 
 peltier = Peltier(peltierPin)
 motor = Motor(motorPin1, motorPin2)
+myServer = MyServer(manager)
 # Write sensor data to LCD
 LCDisplay = LCD(29, 31, 33, 35, 37, 38)
 LCDisplay.begin(16,2)
@@ -88,28 +92,35 @@ def light_adc_to_percent(light_adc):
 
 def readValues():
     soilHum1 = allSoil[0].read_pct()
-    soilHum2 = allSoil[1].read_pct()
     airHum, airTemp = Adafruit_DHT.read_retry(airHumAirTempSensor, airHumAirTempPin)
     lightSensorFromADC = lightSensor.readadc()
     lightSensorValue = light_adc_to_percent(lightSensorFromADC)
-    return [airTemp, airHum, soilHum1, soilHum2, lightSensorValue]
+    return [airTemp, airHum, soilHum1, lightSensorValue]
 
 def sendData(measurements):
-    r = requests.post(baseUrl + sensorMeasurmentsUrlSuffix
-                      , json={'1': measurements[0],
-                              '2': measurements[1],
-                              '3': measurements[4],
-                              '4': measurements[2],
-                              '5': measurements[3]})
+    airTemp = measurements[0]
+	airHum = measurements[1]
+	soilHum = measurements[2]
+    lightSensor = measurements[3]
+	
+	if 	(int(airTemp) != lastAirTemp) or (int(airHum) != lastAirHum) or (int(soilHum) != lastSoilHum1) or (int(lightSensor)) != lastLight)
+
+		r = requests.post(baseUrl + sensorMeasurmentsUrlSuffix
+						  , json={'1': airTemp,
+								  '2': airHum,
+								  '3': soilHum,
+								  '4': lightSensor})
+	
+	lastAirTemp, lastAirHum, lastSoilHum1, lastLight = int(float(airTemp)),int(float(airHum)), int(float(soilHum)),int(float(lightSensor))
 
 def evaluateRules(measurments):
     actions_plant_1 = manager.get_actions(measurements[0], measurements[1], {"pump": 1 , "value": measurements[2]})
-    actions_plant_2 = manager.get_actions(measurements[0], measurements[1], {"pump": 2 , "value": measurements[3]})
+    """actions_plant_2 = manager.get_actions(measurements[0], measurements[1], {"pump": 2 , "value": measurements[3]})"""
     
     return {
             "pump1": actions_plant_1['watering'],
-            "pump2": actions_plant_2['watering'],
-            "pump3": actions_plant_2['watering'],
+            """pump2": actions_plant_2['watering'],
+            "pump3": actions_plant_2['watering'],"""
             "heating": actions_plant_1['heating'],
             "cooling": actions_plant_1['cooling'],
             "light": actions_plant_1['light']
@@ -172,9 +183,30 @@ def startActuators(actuatorCommands):
     if actuatorCommands['pump3']:
         pump3.runPump(WATERING_TIME_SEC)
         
-
+def setSensors():
+	 request = requests.get(url=self.url_get)
+	 request.raise_for_status()
+		if request.ok:
+			farmSensors = json.loads(request.content)
+			if 'code' in farmSensors:
+				for farmSensor in farmSensors:
+					if farmSensor['code'].startswith("TMP")
+						airTempSensorId = farmSensor['id']
+					elif farmSensor['code'].startswith("AHUM")
+						airHumSensorId = farmSensor['id']
+					elif farmSensor['code'].startswith("LGT")
+						lightSensorId = farmSensor['id']
+					elif farmSensor['code'].startswith("SHUM")
+						soilHum1SensorId = farmSensor['id']
 try:
     if __name__ == "__main__":
+	
+		hostName = '192.168.0.114'  # Change this to your Raspberry Pi IP address
+		hostPort = 8000
+		httpServer = HTTPServer((hostName, hostPort), myServer)
+		print("Server Starts - %s:%s" % (hostName, hostPort))
+		httpServer.serve_forever()
+		setSensors();
          while 1:
             print("------ Script start ------")
             
@@ -194,6 +226,7 @@ try:
                 print("Error")
             time.sleep(EXECUTE_TIME)
 except KeyboardInterrupt:
+	http_server.server_close()
     print("Exit program")
 finally:
     GPIO.cleanup()

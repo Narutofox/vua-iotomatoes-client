@@ -23,12 +23,12 @@ class ActionManager():
         self.__initializeJobs()
             
     def __initializeJobs(self):
-        self.__getRuleset()
-        self.scheduler = BackgroundScheduler()
+        self.getRuleset()
+       """self.scheduler = BackgroundScheduler()
         self.scheduler.add_job(self.__getRuleset, "interval", seconds=self.scheduler_seconds, id="rest_job")
-        self.scheduler.start() 
+        self.scheduler.start()"""
     
-    def __getRuleset(self):
+    def getRuleset(self):
         try: 
             request = requests.get(url=self.url_get)
             request.raise_for_status()
@@ -46,25 +46,57 @@ class ActionManager():
         return str(hours) + '' + str(minutes)
 
     def get_actions(self, temperature, air_humidity, soil_humidity):                
-        currentDate = datetime.now()
-        delta = currentDate - self.started_date
-        currentDay = delta.days
-        midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
-        seconds = (currentDate - midnight).seconds
-        currentTime = self.__get_time(seconds)
 
-        data = { 
-            "currentTime" : int(currentTime), 
-            "currentDay" : currentDay,
-            "soilHumidity": soil_humidity['value'],
-            "airTemperature" : temperature,
-            "airHumidity" : air_humidity
-        }
-        pump = soil_humidity['pump']
-        watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering[pump] == True else False
-        light = jsonLogic(json.loads(self.ruleset['lgt']), data)
-        heating = jsonLogic(json.loads(self.ruleset['htn']), data)
-        cooling = jsonLogic(json.loads(self.ruleset['cln']), data)
+		watering = False
+		light = False
+		heating = False
+		cooling = False
+		pump = soil_humidity['pump']
+		currentDate = datetime.now()
+		"""{"MinimumTemperature":15,
+		"MaximumTemperature":25,
+		"MinimumSoilHumidity":0,
+		"MaximumSoilHumidity":0,
+		"LightTimeSwitchOn":"2020-08-23T09:00:00",
+		"LightTimeSwitchOff":"2020-08-23T16:00:00"}"""
+		if 'all' in self.ruleset:
+			rules = json.loads(self.ruleset['all'])
+			minTemperature = int(rules["MinimumTemperature"])
+			maxTemperature = int(rules["MaximumTemperature"])
+			minSoilHumidity = int(rules["MinimumSoilHumidity"])
+			maxSoilHumidity = int(rules["MaximumSoilHumidity"])
+			currentTemperature = float(temperature)
+			currentSoilHumidity = float(soil_humidity['value'])
+			lightTimeOn = datetime.datetime.strptime(rules["LightTimeSwitchOn"].replace("T", " "), '%Y-%m-%d %H:%M:%S')
+			lightTimeOff = datetime.datetime.strptime(rules["LightTimeSwitchOn"].replace("T", " "), '%Y-%m-%d %H:%M:%S')
+
+			if (currentSoilHumidity <= minSoilHumidity) or (currentSoilHumidity >=  maxSoilHumidity)
+				watering = True
+			if currentTemperature < minTemperature
+				heating = True
+			if currentTemperature >  maxTemperature
+				cooling = True
+			if (lightTimeOn.time() >=  currentDate.time()) and  (lightTimeOff.time() <=  currentDate.time())
+				light = True
+		else
+			delta = currentDate - self.started_date
+			currentDay = delta.days
+			midnight = currentDate.replace(hour=0, minute=0, second=0, microsecond=0)
+			seconds = (currentDate - midnight).seconds
+			currentTime = self.__get_time(seconds)
+			data = { 
+				"currentTime" : int(currentTime), 
+				"currentDay" : currentDay,
+				"soilHumidity": soil_humidity['value'],
+				"airTemperature" : temperature,
+				"airHumidity" : air_humidity
+			}
+				
+			
+			watering = jsonLogic(json.loads(self.ruleset['wtr']), data) if self.watering[pump] == True else False
+			light = jsonLogic(json.loads(self.ruleset['lgt']), data)
+			heating = jsonLogic(json.loads(self.ruleset['htn']), data)
+			cooling = jsonLogic(json.loads(self.ruleset['cln']), data)
 
         
         if watering:
