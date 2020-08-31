@@ -116,12 +116,9 @@ def sendData(measurements):
 
 def evaluateRules(measurments):
     actions_plant_1 = manager.get_actions(measurements[0], measurements[1], {"pump": 1 , "value": measurements[2]})
-    """actions_plant_2 = manager.get_actions(measurements[0], measurements[1], {"pump": 2 , "value": measurements[3]})"""
     
     return {
             "pump1": actions_plant_1['watering'],
-            """pump2": actions_plant_2['watering'],
-            "pump3": actions_plant_2['watering'],"""
             "heating": actions_plant_1['heating'],
             "cooling": actions_plant_1['cooling'],
             "light": actions_plant_1['light']
@@ -183,11 +180,20 @@ def startActuators(actuatorCommands):
         
     if actuatorCommands['pump3']:
         pump3.runPump(WATERING_TIME_SEC)
-        
+ 
+def get_ip_address():
+	url = "https://api.ipify.org/?format=json" # Napraviti novi kontroler na web api koj vraća IP addresu sa koje je zahtjev poslan
+	 request = requests.get(url)
+
+            if request.ok:
+                content = json.loads(request.content)
+				return content["ip"]
+			return "";
+	
 try:
     if __name__ == "__main__":
 	
-		hostName = '192.168.0.114'  # Change this to your Raspberry Pi IP address
+		hostName = get_ip_address()  # Change this to your Raspberry Pi IP address
 		hostPort = 8000
 		httpServer = HTTPServer((hostName, hostPort), myServer)
 		print("Server Starts - %s:%s" % (hostName, hostPort))
