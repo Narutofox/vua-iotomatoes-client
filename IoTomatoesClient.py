@@ -84,6 +84,12 @@ lightSensor = Mcp3008(5)
 
 airHumAirTempPin = 4
 airHumAirTempSensor = Adafruit_DHT.DHT22
+currentActuatorCommands = {
+			'watering': False,
+			'light': False,
+			'heating': False,
+			'cooling': False
+		}
 
 def light_adc_to_percent(light_adc):
     min = 0
@@ -98,12 +104,12 @@ def readValues():
     return [airTemp, airHum, soilHum1, lightSensorValue]
 
 def sendData(measurements):
-    airTemp = measurements[0]
+	airTemp = measurements[0]
 	airHum = measurements[1]
 	soilHum = measurements[2]
-    lightSensor = measurements[3]
+	lightSensor = measurements[3]
 	
-	if 	(int(airTemp) != lastAirTemp) or (int(airHum) != lastAirHum) or (int(soilHum) != lastSoilHum1) or (int(lightSensor)) != lastLight)
+	if 	(int(airTemp) != lastAirTemp) or (int(airHum) != lastAirHum) or (int(soilHum) != lastSoilHum1) or (int(lightSensor) != lastLight):
 
 		r = requests.post(baseUrl + sensorMeasurmentsUrlSuffix
 						  , json={'FarmId': farmId,
@@ -115,7 +121,7 @@ def sendData(measurements):
 	lastAirTemp, lastAirHum, lastSoilHum1, lastLight = int(float(airTemp)),int(float(airHum)), int(float(soilHum)),int(float(lightSensor))
 
 def evaluateRules(measurments):
-    actions_plant_1 = manager.get_actions(measurements[0], measurements[1], {"pump": 1 , "value": measurements[2]})
+    actions_plant_1 = manager.get_actions(measurements[0], measurements[1], {"pump": 1 , "value": measurements[2]},currentActuatorCommands)
     
     return {
             "pump1": actions_plant_1['watering'],
@@ -144,7 +150,7 @@ def displayOnLCD(measurments):
 def startActuators(actuatorCommands):
     global curr_pos
     #global MOTOR_RUNTIME
-    
+	
     if actuatorCommands['light']:
         lamp.on()
     else:
@@ -183,42 +189,40 @@ def startActuators(actuatorCommands):
  
 def get_ip_address():
 	url = "https://api.ipify.org/?format=json" # Napraviti novi kontroler na web api koj vraća IP addresu sa koje je zahtjev poslan
-	 request = requests.get(url)
-
-            if request.ok:
-                content = json.loads(request.content)
-				return content["ip"]
-			return "";
+	request = requests.get(url)
+	if request.ok:
+		content = json.loads(request.content)
+		return content["ip"]
+	return "";
 	
 try:
-    if __name__ == "__main__":
-	
+	if __name__ == "__main__":	
 		hostName = get_ip_address()  # Change this to your Raspberry Pi IP address
 		hostPort = 8000
 		httpServer = HTTPServer((hostName, hostPort), myServer)
 		print("Server Starts - %s:%s" % (hostName, hostPort))
-		httpServer.serve_forever()
-		
-         while 1:
-            print("------ Script start ------")
-            
-            try:            
-                print('Reading values')
-                measurements = readValues()
-                print('Displaying values')
-                displayOnLCD(measurements)                
-                print('Evaluating rules')
-                actuatorCommands = evaluateRules(measurements)
-                print('Starting commands')
-                startActuators(actuatorCommands)
-                print("Sending measurements")
-                print(measurements)
-                sendData(measurements)
-            except:
-                print("Error")
-            time.sleep(EXECUTE_TIME)
+		httpServer.serve_forever()		
+		while 1:
+			print("------ Script start ------")
+			
+			try:            
+				print('Reading values')
+				measurements = readValues()
+				print('Displaying values')
+				displayOnLCD(measurements)                
+				print('Evaluating rules')
+				actuatorCommands = evaluateRules(measurements)
+				print('Starting commands')
+				currentActuatorCommands = actuatorCommands;
+				startActuators(actuatorCommands)
+				print("Sending measurements")
+				print(measurements)
+				sendData(measurements)
+			except:
+				print("Error")
+			time.sleep(EXECUTE_TIME)
 except KeyboardInterrupt:
 	http_server.server_close()
-    print("Exit program")
+	print("Exit program")
 finally:
     GPIO.cleanup()
